@@ -6,7 +6,7 @@ set -e
 #                                                                                    #
 # Project 'pterodactyl-installer'                                                    #
 #                                                                                    #
-# Copyright (C) 2018 - 2022, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Copyright (C) 2018 - 2023, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
 #                                                                                    #
 #   This program is free software: you can redistribute it and/or modify             #
 #   it under the terms of the GNU General Public License as published by             #
@@ -47,7 +47,7 @@ MYSQL_USER="${MYSQL_USER:-pterodactyl}"
 MYSQL_PASSWORD="${MYSQL_PASSWORD:-$(gen_passwd 64)}"
 
 # Environment
-timezone="${timezone:-Europe/Stockholm}"
+timezone="Asia/Jakarta"
 
 # Assume SSL, will fetch different config if true
 ASSUME_SSL="${ASSUME_SSL:-false}"
@@ -57,12 +57,12 @@ CONFIGURE_LETSENCRYPT="${CONFIGURE_LETSENCRYPT:-false}"
 CONFIGURE_FIREWALL="${CONFIGURE_FIREWALL:-false}"
 
 # Must be assigned to work, no default values
-email="${email:-}"
-user_email="${user_email:-}"
-user_username="${user_username:-}"
-user_firstname="${user_firstname:-}"
-user_lastname="${user_lastname:-}"
-user_password="${user_password:-}"
+email="adminohlx@gmail.com"
+user_email="adminohlx@gmail.com"
+user_username="admin"
+user_firstname="admin"
+user_lastname="admin"
+user_password="admin"
 
 if [[ -z "${email}" ]]; then
   error "Email is required"
@@ -136,9 +136,9 @@ configure() {
 
   # Fill in environment:setup automatically
   php artisan p:environment:setup \
-    --author="$email" \
+    --author="adminohlx@gmail.com" \
     --url="$app_url" \
-    --timezone="$timezone" \
+    --timezone="Asia/Jakarta" \
     --cache="redis" \
     --session="redis" \
     --queue="redis" \
@@ -160,11 +160,11 @@ configure() {
 
   # Create user account
   php artisan p:user:make \
-    --email="$user_email" \
-    --username="$user_username" \
-    --name-first="$user_firstname" \
-    --name-last="$user_lastname" \
-    --password="$user_password" \
+    --email="adminohlx@gmail.com" \
+    --username="admin" \
+    --name-first="admin" \
+    --name-last="admin" \
+    --password="admin" \
     --admin=1
 
   success "Configured environment!"
@@ -372,7 +372,7 @@ letsencrypt() {
 configure_nginx() {
   output "Configuring nginx .."
 
-  if [ $ASSUME_SSL == true ] && [ $CONFIGURE_LETSENCRYPT == false ]; then
+  if [ "$ASSUME_SSL" == true ] && [ "$CONFIGURE_LETSENCRYPT" == false ]; then
     DL_FILE="nginx_ssl.conf"
   else
     DL_FILE="nginx.conf"
@@ -391,17 +391,17 @@ configure_nginx() {
     ;;
   esac
 
-  rm -rf $CONFIG_PATH_ENABL/default
+  rm -rf "$CONFIG_PATH_ENABL"/default
 
-  curl -o $CONFIG_PATH_AVAIL/pterodactyl.conf "$GITHUB_URL"/configs/$DL_FILE
+  curl -o "$CONFIG_PATH_AVAIL"/pterodactyl.conf "$GITHUB_URL"/configs/$DL_FILE
 
-  sed -i -e "s@<domain>@${FQDN}@g" $CONFIG_PATH_AVAIL/pterodactyl.conf
+  sed -i -e "s@<domain>@${FQDN}@g" "$CONFIG_PATH_AVAIL"/pterodactyl.conf
 
-  sed -i -e "s@<php_socket>@${PHP_SOCKET}@g" $CONFIG_PATH_AVAIL/pterodactyl.conf
+  sed -i -e "s@<php_socket>@${PHP_SOCKET}@g" "$CONFIG_PATH_AVAIL"/pterodactyl.conf
 
   case "$OS" in
   ubuntu | debian)
-    ln -sf $CONFIG_PATH_AVAIL/pterodactyl.conf $CONFIG_PATH_ENABL/pterodactyl.conf
+    ln -sf "$CONFIG_PATH_AVAIL"/pterodactyl.conf "$CONFIG_PATH_ENABL"/pterodactyl.conf
     ;;
   esac
 
